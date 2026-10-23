@@ -2,17 +2,26 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "go",
-			"label": "go: build package",
-			"command": "build",
+			"type": "shell",
+			"label": "build go as windows",
+			"command": "go",
 			"args": [
-				"${fileDirname}"
+				"build",
+				"-o",
+				"${fileDirnameBasename}.exe",
+				"-ldflags=\"-H=windowsgui\""
 			],
+			"options": {
+				"env": {
+					"GOOS": "windows",
+					"GOARCH": "amd64"
+				}
+			},
 			"problemMatcher": [
 				"$go"
 			],
 			"group": "build",
-			"detail": "cd /workspaces/outlast-map-measurer; GOOS=windows GOARCH=amd64; go build ${fileDirname}"
+			"detail": "Cross-compile Go binary for Windows GUI"
 		}
 	]
 }
