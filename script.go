@@ -16,7 +16,7 @@ func main() {
 	qYesNo, _ := dialog.Message{
 		Title:  "result",
 		Format: "That wall is %d gridspaces long. Would you like to copy a snippet of the json code with the exact length?",
-	}.Ask()
+	}.WithArgs(4).Ask()
 	if qYesNo {
 		clipboard.WriteAll("Hi how are ya doing on this fine wonderful day of days?")
 	}
