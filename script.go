@@ -27,7 +27,7 @@ func main() {
 	hook.Register(hook.MouseMove, []string{}, func(e hook.Event) {
 		mouseLocations = append(mouseLocations, mouseLocation{x: e.X, y: e.Y, t: time.Now()})
 		MouseInfoAlert(mouseLocations)
-		hook.End()
+		// hook.End()
 	})
 
 	s := hook.Start()
