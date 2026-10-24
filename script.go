@@ -1,7 +1,10 @@
 // from Ben Sarah Golightly
 package main
 
-import "github.com/tawesoft/golib/v2/dialog"
+import (
+	"github.com/atotto/clipboard"
+	"github.com/tawesoft/golib/v2/dialog"
+)
 
 func main() {
 	dialog.Alert("There are %d lights", 4)
@@ -11,10 +14,10 @@ func main() {
 		Icon:   dialog.IconWarning,
 	}.WithArgs(4).Raise()
 	qYesNo, _ := dialog.Message{
-		Title:  "Let's test you",
-		Format: "There were four lights, correct?",
+		Title:  "result",
+		Format: "That wall is %d gridspaces long. Would you like to copy a snippet of the json code with the exact length?",
 	}.Ask()
 	if qYesNo {
-		dialog.Alert("Tee Hee?")
+		clipboard.WriteAll("Hi how are ya doing on this fine wonderful day of days?")
 	}
 }
