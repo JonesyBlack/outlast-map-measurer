@@ -27,7 +27,9 @@ func main() {
 		mouseLocations = append(mouseLocations, mouseLocation{x: e.X, y: e.Y, t: time.Now()})
 		// hook.End()
 	})
-
+	hook.Register(hook.KeyDown, []string{"z"}, func(e hook.Event) {
+		hook.End()
+	})
 	s := hook.Start()
 	<-hook.Process(s)
 
