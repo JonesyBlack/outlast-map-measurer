@@ -1,0 +1,27 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "build go as windows",
+			"command": "go",
+			"args": [
+				"build",
+				"-o",
+				"${fileDirnameBasename}.exe",
+				"-ldflags=\"-H=windowsgui\""
+			],
+			"options": {
+				"env": {
+					"GOOS": "windows",
+					"GOARCH": "amd64"
+				}
+			},
+			"problemMatcher": [
+				"$go"
+			],
+			"group": "build",
+			"detail": "Cross-compile Go binary for Windows GUI"
+		}
+	]
+}
