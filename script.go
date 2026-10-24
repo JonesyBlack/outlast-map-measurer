@@ -25,17 +25,18 @@ func main() {
 	// }
 	hook.Register(hook.MouseMove, []string{}, func(e hook.Event) {
 		mouseLocations = append(mouseLocations, mouseLocation{x: e.X, y: e.Y, t: time.Now()})
-		MouseInfoAlert(mouseLocations)
 		// hook.End()
 	})
 
 	s := hook.Start()
 	<-hook.Process(s)
+
+	MouseInfoAlert(mouseLocations)
 }
 
 func MouseInfoAlert(mLocs []mouseLocation) {
 	dialog.Message{
 		Title:  "info",
-		Format: "mouseLocations is idek lol",
+		Format: "mouseLocations is %v lol",
 	}.WithArgs(mLocs).Raise()
 }
