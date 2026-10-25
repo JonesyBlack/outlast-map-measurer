@@ -27,7 +27,7 @@ func main() {
 	for {
 		i := <-hk
 
-		if i.Kind == hook.MouseDrag {
+		if i.Kind == hook.MouseMove {
 			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
 		}
 
