@@ -31,7 +31,7 @@ func main() {
 			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
 		}
 
-		if i.Kind == hook.KeyDown {
+		if i.Kind == hook.KeyDown && i.Rawcode == 44 {
 			dialog.Message{
 				Title:  "Info",
 				Format: "key down: %d",
