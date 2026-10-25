@@ -24,24 +24,21 @@ func main() {
 	hk := hook.Start()
 	defer hook.End()
 
-	ct := false
 	for {
 		i := <-hk
 
 		if i.Kind == hook.MouseDrag {
 			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
-			ct = true
 		}
 
-		if ct && i.Rawcode == 12 {
+		if i.Kind == hook.KeyDown {
+			dialog.Message{
+				Title:  "Info",
+				Format: "key down: %d",
+			}.WithArgs(i.Keycode).Raise()
 			break
 		}
 	}
-	hook.Register(hook.KeyDown, []string{"z"}, func(e hook.Event) {
-		hook.End()
-	})
-	s := hook.Start()
-	<-hook.Process(s)
 
 	MouseInfoAlert(mouseLocations)
 }
