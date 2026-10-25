@@ -31,11 +31,11 @@ func main() {
 			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
 		}
 
-		if i.Kind == hook.KeyDown && i.Rawcode == 44 {
+		if i.Kind == hook.KeyDown {
 			dialog.Message{
 				Title:  "Info",
 				Format: "key down: %d",
-			}.WithArgs(i.Keycode).Raise()
+			}.WithArgs(i.Rawcode).Raise()
 			break
 		}
 	}
