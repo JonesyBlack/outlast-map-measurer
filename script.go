@@ -2,8 +2,7 @@
 package main
 
 import (
-	"time"
-
+	"github.com/atotto/clipboard"
 	hook "github.com/robotn/gohook"
 	"github.com/tawesoft/golib/v2/dialog"
 )
@@ -11,22 +10,33 @@ import (
 type mouseLocation struct {
 	x int16
 	y int16
-	t time.Time
 }
 
 func main() {
 	mouseLocations := []mouseLocation{}
-	// qYesNo, _ := dialog.Message{
-	// 	Title:  "result",
-	// 	Format: "That wall is %d gridspaces long. Would you like to copy a snippet of the json code with the exact length?",
-	// }.WithArgs(4).Ask()
-	// if qYesNo {
-	// 	clipboard.WriteAll("Hi how are ya doing on this fine wonderful day of days?")
-	// }
-	hook.Register(hook.MouseMove, []string{}, func(e hook.Event) {
-		mouseLocations = append(mouseLocations, mouseLocation{x: e.X, y: e.Y, t: time.Now()})
-		// hook.End()
-	})
+	qYesNo, _ := dialog.Message{
+		Title:  "result",
+		Format: "That wall is %d gridspaces long. Would you like to copy a snippet of the json code with the exact length?",
+	}.WithArgs(4).Ask()
+	if qYesNo {
+		clipboard.WriteAll("Hi how are ya doing on this fine wonderful day of days?")
+	}
+	hk := hook.Start()
+	defer hook.End()
+
+	ct := false
+	for {
+		i := <-hk
+
+		if i.Kind == hook.MouseDrag {
+			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
+			ct = true
+		}
+
+		if ct && i.Rawcode == 12 {
+			break
+		}
+	}
 	hook.Register(hook.KeyDown, []string{"z"}, func(e hook.Event) {
 		hook.End()
 	})
