@@ -9,10 +9,12 @@
 				"build",
 				"-o",
 				"${fileDirnameBasename}.exe",
-				"-ldflags=\"-H=windowsgui\""
+				"-ldflags=\"-H=windowsgui\"",
+				"-tags=purego"
 			],
 			"options": {
 				"env": {
+					"CGO_ENABLED":"0",
 					"GOOS": "windows",
 					"GOARCH": "amd64"
 				}
