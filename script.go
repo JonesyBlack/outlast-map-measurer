@@ -5,6 +5,7 @@ import (
 	"github.com/atotto/clipboard"
 	hook "github.com/robotn/gohook"
 	"github.com/tawesoft/golib/v2/dialog"
+	// "github.com/go-vgo/robotgo"
 )
 
 type mouseLocation struct {
