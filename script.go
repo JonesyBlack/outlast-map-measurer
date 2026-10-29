@@ -3,14 +3,14 @@ package main
 
 import (
 	"github.com/atotto/clipboard"
+	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
 	"github.com/tawesoft/golib/v2/dialog"
-	// "github.com/go-vgo/robotgo"
 )
 
 type mouseLocation struct {
-	x int16
-	y int16
+	x int
+	y int
 }
 
 func main() {
@@ -29,7 +29,9 @@ func main() {
 		i := <-hk
 
 		if i.Kind == hook.MouseMove {
-			mouseLocations = append(mouseLocations, mouseLocation{x: i.X, y: i.Y})
+			x, y := robotgo.Location()
+
+			mouseLocations = append(mouseLocations, mouseLocation{x: x, y: y})
 		}
 
 		if i.Kind == hook.KeyDown && i.Rawcode == 90 {
