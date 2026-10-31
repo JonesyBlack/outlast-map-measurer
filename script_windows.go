@@ -18,6 +18,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 	switch msg {
 	case WM_CLOSE:
 		DestroyWindow(hwnd)
+		MessageBox(HWND(uintptr(0)), "After the Window has been closed", "Info", MB_ICONINFORMATION|MB_OK)
 	case WM_DESTROY:
 		PostQuitMessage(0)
 	default:
