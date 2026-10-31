@@ -4,7 +4,6 @@ package main
 import (
 	"strconv"
 	"syscall"
-	"unsafe"
 
 	. "github.com/gonutz/w32/v2"
 	"github.com/tawesoft/golib/v2/dialog"
@@ -46,10 +45,14 @@ func main() {
 		Instance:   GetModuleHandle(""),
 		Background: (HBRUSH)(COLOR_WINDOW + 1),
 	}
-	MessageBox(HWND(uintptr(0)), "After the WNDCLASSEX has been made", "Info", MB_ICONINFORMATION|MB_OK)
+	MessageBox(HWND(0), "After the WNDCLASSEX has been made", "Info", MB_ICONINFORMATION|MB_OK)
 	var hwnd HWND
 	var Msg MSG
-	RegisterClassEx(&wc)
+	if RegisterClassEx(&wc) == 0 {
+		MessageBox(HWND(0), "Window Registration Failed!", "Error!",
+			MB_ICONEXCLAMATION|MB_OK)
+		return
+	}
 
 	// Step 2: Creating the Window
 	hwnd = CreateWindowEx(
@@ -58,7 +61,7 @@ func main() {
 		szTitleName,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 240, 120,
-		HWND(uintptr(0)), HMENU(uintptr(0)), GetModuleHandle(string(0)), unsafe.Pointer(uintptr(0)))
+		HWND(uintptr(0)), HMENU(uintptr(0)), GetModuleHandle(""), nil)
 
 	if hwnd == HWND(uintptr(0)) {
 		MessageBox(HWND(uintptr(0)), "Window Creation Failed!", "Error!",
