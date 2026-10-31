@@ -41,9 +41,10 @@ func main() {
 		ClsExtra:   0,
 		WndExtra:   0,
 		ClassName:  szClassName,
-		Instance:   GetModuleHandle(string(0)),
+		Instance:   GetModuleHandle(""),
 		Background: (HBRUSH)(COLOR_WINDOW + 1),
 	}
+	MessageBox(HWND(uintptr(0)), "After the WNDCLASSEX has been made", "Info", MB_ICONINFORMATION|MB_OK)
 	var hwnd HWND
 	var Msg MSG
 	RegisterClassEx(&wc)
