@@ -2,6 +2,7 @@
 package main
 
 import (
+	"strconv"
 	"syscall"
 	"unsafe"
 
@@ -33,8 +34,8 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 //		this->eventBuffer.push(MouseEvent(MouseEvent::EventType::RAW_MOVE, x, y))
 //	}
 func main() {
-	szClassName, _ := syscall.UTF16PtrFromString("myWindowClass")
-	szTitleName, _ := syscall.UTF16PtrFromString("My Window Title") // Shouldn't need this once I make it headless, but I just wanna get a window for now because more guides.
+	szClassName, _ := syscall.UTF16PtrFromString("myTrialsMeasurer")
+	szTitleName, _ := syscall.UTF16PtrFromString("TrialsMeasurer") // Shouldn't need this once I make it headless, but I just wanna get a window for now because more guides.
 
 	var wc = WNDCLASSEX{
 		Style:      0,
@@ -67,6 +68,7 @@ func main() {
 
 	ShowWindow(hwnd, SW_SHOWNORMAL)
 	UpdateWindow(hwnd)
+	MessageBox(HWND(uintptr(0)), "After the window has been updated for the first time, HWND: "+strconv.FormatUint(uint64(uintptr(hwnd)), 10), "Info", MB_ICONINFORMATION|MB_OK)
 
 	for GetMessage(&Msg, HWND(uintptr(0)), 0, 0) > 0 {
 		TranslateMessage(&Msg)
