@@ -11,9 +11,13 @@ import (
 )
 
 type mouseLocation struct {
-	x int
-	y int
+	x    int32
+	y    int32
+	mode string
+	str  string
 }
+
+var mouseLocations = []mouseLocation{}
 
 func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 	switch msg {
@@ -37,9 +41,10 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				moveMode = "rel"
 			}
 			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
-			MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
+			mouseLocations = append(mouseLocations, mouseLocation{x: mouse.LastX, y: mouse.LastY, mode: moveMode, str: str})
+			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
-			if (mouse.ButtonFlags() & uint16(RI_MOUSE_LEFT_BUTTON_DOWN)) != 0 {
+			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_DOWN) != 0 {
 				MessageBox(HWND(uintptr(0)), "left down", "Info", MB_ICONINFORMATION|MB_OK)
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_UP) != 0 {
@@ -47,6 +52,9 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0 {
 				MessageBox(HWND(uintptr(0)), "Right down", "Info", MB_ICONINFORMATION|MB_OK)
+				DestroyWindow(hwnd)
+				MouseInfoAlert(mouseLocations)
+				// TODO: MAKE THE THING ACTUALLY BE WHEN YOU PRESS Z AND NOT RIGHT CLICK, ALSO, FIX THE THING TO NOT USE THE DIALOG IMPORT NOW
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_UP) != 0 {
 				MessageBox(HWND(uintptr(0)), "Right up", "Info", MB_ICONINFORMATION|MB_OK)
@@ -70,6 +78,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				MessageBox(HWND(uintptr(0)), "x2 up", "Info", MB_ICONINFORMATION|MB_OK)
 			}
 		}
+		return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
 
 	default:
 		return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
@@ -143,7 +152,6 @@ func main() {
 		DispatchMessage(&Msg)
 	}
 
-	// mouseLocations := []mouseLocation{}
 	// qYesNo, _ := dialog.Message{
 	// 	Title:  "result",
 	// 	Format: "That wall is %d gridspaces long. Would you like to copy a snippet of the json code with the exact length?",
@@ -160,7 +168,6 @@ func main() {
 	// 	if i.Kind == hook.MouseMove {
 	// 		x, y := robotgo.Location()
 
-	// 		mouseLocations = append(mouseLocations, mouseLocation{x: x, y: y})
 	// 	}
 
 	// 	if i.Kind == hook.KeyDown && i.Rawcode == 90 {
@@ -171,8 +178,6 @@ func main() {
 	// 		break
 	// 	}
 	// }
-
-	// MouseInfoAlert(mouseLocations)
 }
 
 func MouseInfoAlert(mLocs []mouseLocation) {
