@@ -4,7 +4,6 @@ package main
 import (
 	"strconv"
 	"syscall"
-	"unsafe"
 
 	. "github.com/gonutz/w32/v2"
 	"github.com/tawesoft/golib/v2/dialog"
@@ -86,7 +85,7 @@ func main() {
 	szClassName, _ := syscall.UTF16PtrFromString("myTrialsMeasurer")
 	szTitleName, _ := syscall.UTF16PtrFromString("TrialsMeasurer") // Shouldn't need this once I make it headless, but I just wanna get a window for now because more guides.
 
-	var riList []RAWINPUTDEVICE
+	var riList [2]RAWINPUTDEVICE
 	riList[0].UsagePage = 0x05 // HID_USAGE_GAME_CONTROLS
 	riList[0].Usage = 20       // HID_USAGE_Point of View
 	riList[0].Flags = 0        // adds game pad
