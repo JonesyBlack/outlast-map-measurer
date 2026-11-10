@@ -4,6 +4,7 @@ package main
 import (
 	"strconv"
 	"syscall"
+	"unsafe"
 
 	. "github.com/gonutz/w32/v2"
 	"github.com/tawesoft/golib/v2/dialog"
@@ -21,6 +22,55 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 		MessageBox(HWND(uintptr(0)), "After the Window has been closed", "Info", MB_ICONINFORMATION|MB_OK)
 	case WM_DESTROY:
 		PostQuitMessage(0)
+	case WM_INPUT:
+		in, ok := GetRawInputData(HRAWINPUT(lParam), RID_INPUT)
+		if !ok {
+			return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
+		}
+		if in.Header.Type == RIM_TYPEMOUSE {
+			var mouse *RAWMOUSE = (*RAWMOUSE)(unsafe.Pointer(&in))
+
+			var moveMode string
+			if (mouse.Flags & MOUSE_MOVE_ABSOLUTE) != 0 {
+				moveMode = "abs"
+			} else {
+				moveMode = "rel"
+			}
+			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
+			MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
+
+			if (mouse.ButtonFlags() & uint16(RI_MOUSE_LEFT_BUTTON_DOWN)) != 0 {
+				MessageBox(HWND(uintptr(0)), "left down", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_UP) != 0 {
+				MessageBox(HWND(uintptr(0)), "Left up", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0 {
+				MessageBox(HWND(uintptr(0)), "Right down", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_UP) != 0 {
+				MessageBox(HWND(uintptr(0)), "Right up", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0 {
+				MessageBox(HWND(uintptr(0)), "Middle down", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_UP) != 0 {
+				MessageBox(HWND(uintptr(0)), "Middle up", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_4_DOWN) != 0 {
+				MessageBox(HWND(uintptr(0)), "x1 down", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_4_UP) != 0 {
+				MessageBox(HWND(uintptr(0)), "x1 up", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_5_DOWN) != 0 {
+				MessageBox(HWND(uintptr(0)), "x2 down", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_5_UP) != 0 {
+				MessageBox(HWND(uintptr(0)), "x2 up", "Info", MB_ICONINFORMATION|MB_OK)
+			}
+		}
+
 	default:
 		return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
 	}
@@ -35,6 +85,21 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 func main() {
 	szClassName, _ := syscall.UTF16PtrFromString("myTrialsMeasurer")
 	szTitleName, _ := syscall.UTF16PtrFromString("TrialsMeasurer") // Shouldn't need this once I make it headless, but I just wanna get a window for now because more guides.
+
+	var riList []RAWINPUTDEVICE
+	riList[0].UsagePage = 0x05 // HID_USAGE_GAME_CONTROLS
+	riList[0].Usage = 20       // HID_USAGE_Point of View
+	riList[0].Flags = 0        // adds game pad
+	riList[0].Target = 0
+
+	riList[1].UsagePage = 0x01       // HID_USAGE_PAGE_GENERIC
+	riList[1].Usage = 0x02           // HID_USAGE_GENERIC_MOUSE
+	riList[1].Flags = RIDEV_NOLEGACY // adds mouse and also ignores legacy mouse messages
+	riList[1].Target = 0
+
+	if RegisterRawInputDevices(riList[0], riList[1]) {
+		//registration failed. Call GetLastError for the cause of the error
+	}
 
 	var wc = WNDCLASSEX{
 		Style:      0,
@@ -113,6 +178,6 @@ func main() {
 func MouseInfoAlert(mLocs []mouseLocation) {
 	dialog.Message{
 		Title:  "info",
-		Format: "mouseLocations is %v lol",
+		Format: "useLocations is %v lol",
 	}.WithArgs(mLocs).Raise()
 }
