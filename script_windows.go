@@ -4,6 +4,7 @@ package main
 import (
 	"strconv"
 	"syscall"
+	"unsafe"
 
 	. "github.com/gonutz/w32/v2"
 	"github.com/tawesoft/golib/v2/dialog"
