@@ -17,10 +17,19 @@ type mouseLocation struct {
 	str  string
 }
 
+func IgnoreError(ret *uint16, err error) *uint16 {
+	return ret
+}
+
 var mouseLocations = []mouseLocation{}
+var textHwnd HWND
 
 func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 	switch msg {
+	case WM_CREATE:
+		textHwnd = CreateWindow(
+			IgnoreError(syscall.UTF16PtrFromString("EDIT")),
+			IgnoreError(syscall.UTF16PtrFromString("Text Goes Here")), WS_VISIBLE|WS_CHILD|ES_LEFT, 10, 10, 100, 100, hwnd, HMENU(0), GetModuleHandle(""), nil)
 	case WM_CLOSE:
 		DestroyWindow(hwnd)
 		MessageBox(HWND(uintptr(0)), "After the Window has been closed", "Info", MB_ICONINFORMATION|MB_OK)
@@ -41,7 +50,8 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				moveMode = "rel"
 			}
 			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
-			mouseLocations = append(mouseLocations, mouseLocation{x: mouse.LastX, y: mouse.LastY, mode: moveMode, str: str})
+			// mouseLocations = append(mouseLocations, mouseLocation{x: mouse.LastX, y: mouse.LastY, mode: moveMode, str: str})
+			SetWindowText(textHwnd, str)
 			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
 			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_DOWN) != 0 {
