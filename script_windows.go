@@ -29,7 +29,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 	case WM_CREATE:
 		textHwnd = CreateWindow(
 			IgnoreError(syscall.UTF16PtrFromString("EDIT")),
-			IgnoreError(syscall.UTF16PtrFromString("Text Goes Here")), WS_VISIBLE|WS_CHILD|ES_LEFT, 10, 10, 100, 100, hwnd, HMENU(0), GetModuleHandle(""), nil)
+			IgnoreError(syscall.UTF16PtrFromString("Text Goes Here")), WS_VISIBLE|WS_CHILD|ES_LEFT, 10, 10, 1000, 5000, hwnd, HMENU(0), GetModuleHandle(""), nil)
 	case WM_CLOSE:
 		DestroyWindow(hwnd)
 		MessageBox(HWND(uintptr(0)), "After the Window has been closed", "Info", MB_ICONINFORMATION|MB_OK)
