@@ -4,7 +4,6 @@ package main
 import (
 	"strconv"
 	"syscall"
-	"unsafe"
 
 	. "github.com/gonutz/w32/v2"
 	"github.com/tawesoft/golib/v2/dialog"
@@ -25,6 +24,13 @@ var mouseLocations = []mouseLocation{}
 var textHwnd HWND
 
 func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
+	// Problems:
+	// 1. Cannot interact with message boxes
+	// 2. Program stops responding very soon after it launches
+	// 3. Program doesn't even capture the mouse movement at all(?)
+	// 4. cannot scroll text even though https://stackoverflow.com/questions/15429541/displaying-string-output-in-a-window-using-c-in-win32-api
+	// says I should be able to (might actually be related to 1, mayhap. Maybe even 3 is related to 1.)
+	// 5.
 	switch msg {
 	case WM_CREATE:
 		textHwnd = CreateWindow(
@@ -41,7 +47,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
 		}
 		if in.Header.Type == RIM_TYPEMOUSE {
-			var mouse *RAWMOUSE = (*RAWMOUSE)(unsafe.Pointer(&in))
+			var mouse RAWMOUSE = in.GetMouse()
 
 			var moveMode string
 			if (mouse.Flags & MOUSE_MOVE_ABSOLUTE) != 0 {
