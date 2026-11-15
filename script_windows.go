@@ -69,12 +69,12 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_UP) != 0 {
 				MessageBox(HWND(uintptr(0)), "Right up", "Info", MB_ICONINFORMATION|MB_OK)
 			}
-			if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0 {
-				MessageBox(HWND(uintptr(0)), "Middle down", "Info", MB_ICONINFORMATION|MB_OK)
-			}
-			if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_UP) != 0 {
-				MessageBox(HWND(uintptr(0)), "Middle up", "Info", MB_ICONINFORMATION|MB_OK)
-			}
+			// if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0 {
+			// 	MessageBox(HWND(uintptr(0)), "Middle down", "Info", MB_ICONINFORMATION|MB_OK)
+			// }
+			// if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_UP) != 0 {
+			// 	MessageBox(HWND(uintptr(0)), "Middle up", "Info", MB_ICONINFORMATION|MB_OK)
+			// }
 			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_4_DOWN) != 0 {
 				MessageBox(HWND(uintptr(0)), "x1 down", "Info", MB_ICONINFORMATION|MB_OK)
 			}
