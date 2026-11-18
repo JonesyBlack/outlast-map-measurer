@@ -19,6 +19,9 @@ type mouseLocation struct {
 func IgnoreError(ret *uint16, err error) *uint16 {
 	return ret
 }
+func Message(str string) {
+	MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
+}
 
 var mouseLocations = []mouseLocation{}
 var textHwnd HWND
@@ -27,10 +30,8 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 	// Problems:
 	// 1. Cannot interact with message boxes
 	// 2. Program stops responding very soon after it launches
-	// 3. Program doesn't even capture the mouse movement at all(?)
 	// 4. cannot scroll text even though https://stackoverflow.com/questions/15429541/displaying-string-output-in-a-window-using-c-in-win32-api
 	// says I should be able to (might actually be related to 1, mayhap. Maybe even 3 is related to 1.)
-	// 5.
 	switch msg {
 	case WM_CREATE:
 		textHwnd = CreateWindow(
@@ -38,7 +39,6 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			IgnoreError(syscall.UTF16PtrFromString("Text Goes Here")), WS_VISIBLE|WS_CHILD|ES_LEFT, 10, 10, 1000, 5000, hwnd, HMENU(0), GetModuleHandle(""), nil)
 	case WM_CLOSE:
 		DestroyWindow(hwnd)
-		MessageBox(HWND(uintptr(0)), "After the Window has been closed", "Info", MB_ICONINFORMATION|MB_OK)
 	case WM_DESTROY:
 		PostQuitMessage(0)
 	case WM_INPUT:
@@ -61,19 +61,19 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
 			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_DOWN) != 0 {
-				MessageBox(HWND(uintptr(0)), "left down", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("left down")
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_LEFT_BUTTON_UP) != 0 {
-				MessageBox(HWND(uintptr(0)), "Left up", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("Left up")
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0 {
-				MessageBox(HWND(uintptr(0)), "Right down", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("Right down")
 				DestroyWindow(hwnd)
 				MouseInfoAlert(mouseLocations)
 				// TODO: MAKE THE THING ACTUALLY BE WHEN YOU PRESS Z AND NOT RIGHT CLICK, ALSO, FIX THE THING TO NOT USE THE DIALOG IMPORT NOW
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_UP) != 0 {
-				MessageBox(HWND(uintptr(0)), "Right up", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("Right up")
 			}
 			// if (mouse.ButtonFlags() & RI_MOUSE_MIDDLE_BUTTON_DOWN) != 0 {
 			// 	MessageBox(HWND(uintptr(0)), "Middle down", "Info", MB_ICONINFORMATION|MB_OK)
@@ -82,16 +82,16 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			// 	MessageBox(HWND(uintptr(0)), "Middle up", "Info", MB_ICONINFORMATION|MB_OK)
 			// }
 			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_4_DOWN) != 0 {
-				MessageBox(HWND(uintptr(0)), "x1 down", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("x1 down")
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_4_UP) != 0 {
-				MessageBox(HWND(uintptr(0)), "x1 up", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("x1 up")
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_5_DOWN) != 0 {
-				MessageBox(HWND(uintptr(0)), "x2 down", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("x2 down")
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_BUTTON_5_UP) != 0 {
-				MessageBox(HWND(uintptr(0)), "x2 up", "Info", MB_ICONINFORMATION|MB_OK)
+				go Message("x2 up")
 			}
 		}
 		return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
