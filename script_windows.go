@@ -10,9 +10,9 @@ import (
 )
 
 type mouseChange struct {
-	x    int32
-	y    int32
-	mode string
+	x        int32
+	y        int32
+	relative bool
 }
 type location struct {
 	x int32
@@ -35,7 +35,7 @@ func Message(str string) {
 }
 
 func AppendPosition(curPos location, delta mouseChange) {
-	if delta.mode == "abs" {
+	if delta.relative == false {
 		curPos.x = delta.x
 		curPos.y = delta.y
 	} else { // move mode is relative
@@ -79,7 +79,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 		DestroyWindow(hwnd)
 	case WM_DESTROY:
 		PostQuitMessage(0)
-	case WM_INPUT:
+	case WM_INPUT: // "IF IT TAKES TOO LONG TO CALL DEF, IT WILL STOP SENDING ME INPUT"
 		in, ok := GetRawInputData(HRAWINPUT(lParam), RID_INPUT)
 		if !ok {
 			return LRESULT(DefWindowProc(hwnd, msg, uintptr(wParam), uintptr(lParam)))
@@ -94,7 +94,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				moveMode = "rel"
 			}
 			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
-			mouseChanges = append(mouseChanges, mouseChange{x: mouse.LastX, y: mouse.LastY, mode: moveMode})
+			mouseChanges = append(mouseChanges, mouseChange{x: mouse.LastX, y: mouse.LastY, relative: moveMode == "abs"})
 			SetWindowText(textHwnd, str)
 			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
