@@ -9,11 +9,22 @@ import (
 	"github.com/tawesoft/golib/v2/dialog"
 )
 
-type mouseLocation struct {
+type mouseChange struct {
 	x    int32
 	y    int32
 	mode string
-	str  string
+}
+type location struct {
+	x int32
+	y int32
+}
+
+func (loc1 location) sub(loc2 location) location {
+	// does loc2 - loc1
+	var loc3 location
+	loc3.x = loc2.x - loc1.x
+	loc3.y = loc2.y - loc1.y
+	return loc3
 }
 
 func IgnoreError(ret *uint16, err error) *uint16 {
@@ -23,7 +34,34 @@ func Message(str string) {
 	MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 }
 
-var mouseLocations = []mouseLocation{}
+func AppendPosition(curPos location, delta mouseChange) {
+	if delta.mode == "abs" {
+		curPos.x = delta.x
+		curPos.y = delta.y
+	} else { // move mode is relative
+		curPos.x += delta.x
+		curPos.y += delta.y
+	}
+}
+
+// I'm assuming that when I get a string of mouse change messages, i will have them
+// in an array from oldest to newest, and once the array is filled, call this function.
+// I'm also assuming that the conversion between mouse position to camera rotation is
+// rot_x = mouse_x * sensitivity * resolution_x * 2pi such that the sensitivity is
+// some number low enough so that say a full 360  is like
+// x = 250, it's 250 * 1080 * 2pi * (1/(540,000 * pi))
+//
+//	sensitivity
+func CalculateSens(mChanges []mouseChange) location {
+	currentPosition := location{0, 0} // assume starting at 0, 0
+	for i := 0; i < len(mChanges); i++ {
+		AppendPosition(currentPosition, mChanges[i])
+	}
+
+	return currentPosition.sub(location{0, 0})
+}
+
+var mouseChanges = []mouseChange{}
 var textHwnd HWND
 
 func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
@@ -56,7 +94,7 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				moveMode = "rel"
 			}
 			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
-			// mouseLocations = append(mouseLocations, mouseLocation{x: mouse.LastX, y: mouse.LastY, mode: moveMode, str: str})
+			mouseChanges = append(mouseChanges, mouseChange{x: mouse.LastX, y: mouse.LastY, mode: moveMode})
 			SetWindowText(textHwnd, str)
 			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
@@ -68,8 +106,10 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0 {
 				go Message("Right down")
+				positionChange := CalculateSens(mouseChanges)
+				str := strconv.Itoa(int(positionChange.x))
+				Message(str)
 				DestroyWindow(hwnd)
-				MouseInfoAlert(mouseLocations)
 				// TODO: MAKE THE THING ACTUALLY BE WHEN YOU PRESS Z AND NOT RIGHT CLICK, ALSO, FIX THE THING TO NOT USE THE DIALOG IMPORT NOW
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_UP) != 0 {
@@ -135,7 +175,7 @@ func main() {
 		Instance:   GetModuleHandle(""),
 		Background: (HBRUSH)(COLOR_WINDOW + 1),
 	}
-	MessageBox(HWND(0), "After the WNDCLASSEX has been made", "Info", MB_ICONINFORMATION|MB_OK)
+	// MessageBox(HWND(0), "After the WNDCLASSEX has been made", "Info", MB_ICONINFORMATION|MB_OK)
 	var hwnd HWND
 	var Msg MSG
 	if RegisterClassEx(&wc) == 0 {
@@ -196,7 +236,7 @@ func main() {
 	// }
 }
 
-func MouseInfoAlert(mLocs []mouseLocation) {
+func MouseInfoAlert(mLocs []mouseChange) {
 	dialog.Message{
 		Title:  "info",
 		Format: "useLocations is %v lol",
