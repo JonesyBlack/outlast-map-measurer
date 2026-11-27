@@ -2,6 +2,7 @@
 package main
 
 import (
+	"slices"
 	"strconv"
 	"syscall"
 
@@ -33,6 +34,15 @@ func IgnoreError(ret *uint16, err error) *uint16 {
 func Message(str string) {
 	MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 }
+func appendMouseChange(mchanges []mouseChange, mchange mouseChange) {
+	if len(mchanges) < 300 {
+		mchanges = append(mchanges, mchange)
+	} else {
+		mchanges = append(mchanges, mchange)
+		currentPosition = calculateNewLocation(currentPosition, mchanges)
+		mchanges = slices.Delete(mchanges, 0, len(mchanges))
+	}
+}
 
 func AppendPosition(curPos location, delta mouseChange) {
 	if delta.relative == false {
@@ -52,15 +62,20 @@ func AppendPosition(curPos location, delta mouseChange) {
 // x = 250, it's 250 * 1080 * 2pi * (1/(540,000 * pi))
 //
 //	sensitivity
-func CalculateSens(mChanges []mouseChange) location {
-	currentPosition := location{0, 0} // assume starting at 0, 0
-	for i := 0; i < len(mChanges); i++ {
-		AppendPosition(currentPosition, mChanges[i])
-	}
+// func CalculateSens(mChanges []mouseChange) location {
 
-	return currentPosition.sub(location{0, 0})
+// }
+
+func calculateNewLocation(startingLocation location, mChanges []mouseChange) location {
+	currentPosition := startingLocation
+	for i := 0; i < len(mChanges); i++ {
+		AppendPosition(startingLocation, mChanges[i])
+	}
+	return currentPosition.sub(startingLocation)
 }
 
+var startingLocation = location{0, 0}
+var currentPosition = startingLocation
 var mouseChanges = []mouseChange{}
 var textHwnd HWND
 
@@ -94,7 +109,10 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 				moveMode = "rel"
 			}
 			str := "mouse: move" + moveMode + "dx=" + strconv.Itoa(int(mouse.LastX)) + " dy=" + strconv.Itoa(int(mouse.LastY))
-			mouseChanges = append(mouseChanges, mouseChange{x: mouse.LastX, y: mouse.LastY, relative: moveMode == "abs"})
+			go appendMouseChange(mouseChanges, mouseChange{x: mouse.LastX, y: mouse.LastY, relative: moveMode == "abs"})
+			// I'm thinking if I can even do this asynchronously, since it's all going to access the same mouseChanges variable.
+			// even if I can, should I? Do I care about the order of the mouseChanges? I don't think I do to be honest.
+			// go calculateNewLocation(startingLocation, mouseChanges)
 			SetWindowText(textHwnd, str)
 			// MessageBox(HWND(uintptr(0)), str, "Info", MB_ICONINFORMATION|MB_OK)
 
@@ -106,7 +124,8 @@ func WndProc(hwnd HWND, msg uint32, wParam WPARAM, lParam LPARAM) LRESULT {
 			}
 			if (mouse.ButtonFlags() & RI_MOUSE_RIGHT_BUTTON_DOWN) != 0 {
 				go Message("Right down")
-				positionChange := CalculateSens(mouseChanges)
+				currentPosition = calculateNewLocation(currentPosition, mouseChanges)
+				positionChange := startingLocation.sub(currentPosition)
 				str := strconv.Itoa(int(positionChange.x))
 				Message(str)
 				DestroyWindow(hwnd)
